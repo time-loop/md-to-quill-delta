@@ -248,6 +248,10 @@ export class MarkdownToQuill {
     align: string,
     cellId: string
   ): Delta {
+    const SYMBOLS_TO_SPLIT = [
+      '<br>',
+      '<br/>'
+    ];
     const attributes: any = {};
     if (align && align !== 'left') {
       attributes.align = align;
@@ -265,10 +269,13 @@ export class MarkdownToQuill {
     delta = delta.ops.reduce((newDelta: Delta, op: Op) => {
       if (
         typeof op.insert === 'string' &&
-        op.insert.includes('<br>')
+        SYMBOLS_TO_SPLIT.some((symbol) => (op.insert as string).includes(symbol))
       ) {
         hasMultiLineInThisCell = true;
-        op.insert.split('<br>')
+        const lines: Array<string> = SYMBOLS_TO_SPLIT.reduce((strs, symbol) => {
+          return strs.reduce((lines, str) => lines.concat(str.split(symbol)), []);
+        }, [op.insert]);
+        lines
           .map((str) => {
             return this.convert(str);
           })

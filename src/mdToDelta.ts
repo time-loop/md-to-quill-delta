@@ -30,6 +30,10 @@ const defaultOptions: MarkdownToQuillOptions = {
   }
 };
 
+interface ListItemOrderRef {
+  isListInOrder: boolean;
+}
+
 export class MarkdownToQuill {
   options: MarkdownToQuillOptions;
 
@@ -87,6 +91,7 @@ export class MarkdownToQuill {
         console.log('children:', children, extra);
       }
       let prevType;
+      const orderRef = { isListInOrder: true };
       children.forEach((child, idx) => {
         if (this.isBlock(child.type) && this.isBlock(prevType)) {
           if (this.options.preciseLineBreak) {
@@ -114,7 +119,7 @@ export class MarkdownToQuill {
             delta = delta.concat(this.convertChildren(node, child, op, indent));
             break;
           case 'listItem':
-            delta = delta.concat(this.convertListItem(node, child, indent));
+            delta = delta.concat(this.convertListItem(node, child, indent, idx, orderRef));
             break;
           case 'table':
             // insert table cols
@@ -253,11 +258,12 @@ export class MarkdownToQuill {
     });
   }
 
-  private convertListItem(parent: any, node: any, indent = 0): Delta {
+  private convertListItem(parent: any, node: any, indent = 0, idx: number = 0, orderRef: ListItemOrderRef): Delta {
     let delta = new Delta();
     for (const child of node.children) {
       if (child.type === 'code') {
         delta = delta.concat(this.convertCodeBlock(child, 'plain'));
+        orderRef.isListInOrder = false;
         continue;
       }
       delta = delta.concat(this.convertChildren(parent, child, {}, indent + 1));
@@ -274,9 +280,29 @@ export class MarkdownToQuill {
       } else {
         listAttribute = 'bullet';
       }
-      const attributes = { list: listAttribute };
+      const attributes: Object = { list: listAttribute };
       if (indent) {
         attributes['indent'] = indent;
+      }
+
+      if (!orderRef.isListInOrder && parent.ordered) {
+        const parentStart = parent.start ?? 1;
+        const currentIndex = parentStart + idx - 1;
+        attributes['list'] = {
+          list: 'ordered',
+          counters: JSON.stringify({
+            '0': currentIndex,
+            '1': 0,
+            '2': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0,
+            '6': 0,
+            '7': 0,
+            '8': 0,
+          }),
+        } as unknown;
+        orderRef.isListInOrder = true;
       }
 
       delta.push({ insert: '\n', attributes });

@@ -13,3 +13,10 @@ const options = { debug: false };
 const converter = new MarkdownToQuill(options);
 const ops = converter.convert(markdown);
 ```
+
+# Publish
+
+1. Bump package.json version number (and make sure that eventually makes it in master)
+2. Drop to node 16
+3. Make sure dependencies are installed with npm and not pnpm
+4. Run `npm version patch`

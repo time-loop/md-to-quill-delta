@@ -3,6 +3,7 @@ import * as path from 'path';
 import Op from 'quill-delta/dist/Op';
 import Delta from 'quill-delta';
 import { MarkdownToQuill } from '../src/mdToDelta';
+import { defaultCustomHtmlConverter } from '../src/html-converter';
 interface Test {
   name: string;
   ops: Op[];
@@ -72,6 +73,7 @@ describe('Remark-Delta Transformer', () => {
           return String(id);
         },
         ...t.options,
+        customHtmlConverter: defaultCustomHtmlConverter,
       });
       const ops = converter.convert(t.markdown);
       const delta = new Delta();

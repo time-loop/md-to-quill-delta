@@ -1,0 +1,1 @@
+<details><summary>Toggle title</summary>Toggle content</details>

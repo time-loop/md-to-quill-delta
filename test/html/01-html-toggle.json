@@ -1,0 +1,25 @@
+[
+  {
+    "insert": "Toggle title"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "list": {
+        "list": "toggled"
+      }
+    }
+  },
+  {
+    "insert": "Toggle content"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "list": {
+        "list": "none",
+        "indent": 1
+      }
+    }
+  }
+]

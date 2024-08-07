@@ -14,6 +14,13 @@ export interface MarkdownToQuillOptions {
   lineBreakBlocks?: string[];
   preciseLineBreak?: boolean;
   tableIdGenerator: () => string;
+  enableCustomHtmlConverter: boolean;
+  customHtmlConverter?: (
+    parent: Node | Parent,
+    node: Node | Parent,
+    op: Op,
+    indent,
+  ) => Delta | undefined;
 }
 
 const defaultOptions: MarkdownToQuillOptions = {
@@ -32,7 +39,8 @@ const defaultOptions: MarkdownToQuillOptions = {
       .toString(36)
       .slice(2, 6);
     return `row-${id}`;
-  }
+  },
+  enableCustomHtmlConverter: false,
 };
 
 export class MarkdownToQuill {
@@ -203,6 +211,17 @@ export class MarkdownToQuill {
                 child.alt ? { alt: child.alt } : null
               )
             );
+          case 'html':
+            if (
+              this.options.enableCustomHtmlConverter &&
+              typeof this.options.customHtmlConverter === 'function'
+            ) {
+              const d = this.options.customHtmlConverter(node, child, op, indent);
+              if (d) {
+                delta = delta.concat(d);
+              }
+              break;
+            }
           default:
             const d = this.convertInline(node, child, op);
             if (d) {

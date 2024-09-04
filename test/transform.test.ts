@@ -4,6 +4,13 @@ import Op from 'quill-delta/dist/Op';
 import Delta from 'quill-delta';
 import { MarkdownToQuill } from '../src/mdToDelta';
 import { defaultCustomHtmlConverter } from '../src/html-converter';
+
+jest.mock('uuid', () => ({
+  v4: () => {
+    return '1234567890';
+  },
+}));
+
 interface Test {
   name: string;
   ops: Op[];

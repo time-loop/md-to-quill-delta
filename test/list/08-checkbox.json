@@ -9,7 +9,13 @@
     }
   },
   {
-    "insert": "\n    Check 1"
+    "attributes": {
+      "blockId": "1234567890"
+    },
+    "insert": "\n"
+  },
+  {
+    "insert": "    Check 1"
   },
   {
     "insert": "\n",

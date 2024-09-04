@@ -17,7 +17,12 @@
     },
     "insert": "\n"
   },
-  { "insert": "\n" },
+  {
+    "attributes": {
+      "blockId": "1234567890"
+    },
+    "insert": "\n"
+  },
   {
     "insert": "Item three"
   },

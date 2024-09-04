@@ -9,7 +9,16 @@
     "insert": "DB DDL Migration Process"
   },
   {
-    "insert": ":\n\nRun a command to generate a new SQL file under "
+    "insert": ":\n"
+  },
+  {
+    "attributes": {
+      "blockId": "1234567890"
+    },
+    "insert": "\n"
+  },
+  {
+    "insert": "Run a command to generate a new SQL file under "
   },
   {
     "insert": "scripts/migrations/bdr",

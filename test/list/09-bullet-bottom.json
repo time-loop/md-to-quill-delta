@@ -1,0 +1,20 @@
+[
+  {
+    "insert": "reply with the following text exactly\n\nfirst line\n"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "blockId": "1234567890"
+    }
+  },
+  {
+    "insert": "bullet on first line\nsecond line\nthird line"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "list": "bullet"
+    }
+  }
+]

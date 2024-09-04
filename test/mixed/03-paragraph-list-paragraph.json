@@ -1,6 +1,11 @@
 [
-  { "insert": "This is a paragraph" },
-  { "insert": "\n\n" },
+  { "insert": "This is a paragraph\n" },
+  {
+    "attributes": {
+      "blockId": "1234567890"
+    },
+    "insert": "\n"
+  },
   { "insert": "item one" },
   {
     "attributes": {

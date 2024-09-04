@@ -8,6 +8,7 @@ import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
 import { gfmStrikethroughFromMarkdown } from 'mdast-util-gfm-strikethrough';
 import { gfmTaskListItemFromMarkdown } from 'mdast-util-gfm-task-list-item';
 import { Parent } from 'unist';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface MarkdownToQuillOptions {
   debug?: boolean;
@@ -42,6 +43,40 @@ const defaultOptions: MarkdownToQuillOptions = {
   },
   enableCustomHtmlConverter: false,
 };
+
+/**
+ * This function replaces the concat method of Delta.
+ * The concat method in quill-delta will merge two deltas incorrectly
+ * in some cases. This function simply appends the b delta to the a delta.
+ */
+function opsConcat(a: Delta, b: Delta): Delta {
+  if (a.ops.length > 0 ) {
+    const last = a.ops[a.ops.length - 1];
+    if (typeof last.insert === 'string' && last.insert.endsWith('\n')) {
+      const newDelta = new Delta(a.ops.slice());
+      const newInsert = last.insert.slice(0, -1);
+      if (newInsert.length === 0) {
+        if (newDelta.ops[a.ops.length - 1].attributes) {
+          newDelta.ops[a.ops.length - 1].attributes['blockId'] = uuidv4();
+        } else {
+          newDelta.ops[a.ops.length - 1].attributes = {
+            blockId: uuidv4()
+          };
+        }
+      } else {
+        newDelta.ops[a.ops.length - 1].insert = newInsert;
+        newDelta.ops.push({
+          insert: '\n',
+          attributes: {
+            blockId: uuidv4()
+          },
+        });
+      }
+      return newDelta.concat(b);
+    }
+  }
+  return a.concat(b);
+}
 
 export class MarkdownToQuill {
   options: MarkdownToQuillOptions;
@@ -134,7 +169,7 @@ export class MarkdownToQuill {
             delta = delta.concat(this.convertCodeBlock(child));
             break;
           case 'list':
-            delta = delta.concat(this.convertChildren(node, child, op, indent));
+            delta = opsConcat(delta, this.convertChildren(node, child, op, indent));
             break;
           case 'listItem':
             delta = delta.concat(this.convertListItem(node, child, indent));

@@ -49,6 +49,7 @@ export class MarkdownToQuill {
   blocks: string[];
 
   prevEndLine: number = 1;
+  splitAttributes: object | null = null;
 
   constructor(options?: Partial<MarkdownToQuillOptions>) {
     this.options = {
@@ -263,21 +264,48 @@ export class MarkdownToQuill {
   }
 
   private inlineFormat(parent: any, node: any, op: Op, attributes: any): Delta {
-    const text =
-      node.value && typeof node.value === 'string' ? node.value : null;
+    const text = node.value && typeof node.value === 'string' ? node.value : null;
     const newAttributes = { ...op.attributes, ...attributes };
     op = { ...op };
+
     if (text) {
       op.insert = text;
     }
+
     if (Object.keys(newAttributes).length) {
       op.attributes = newAttributes;
     }
-    return node.children
-      ? this.convertChildren(parent, node, op)
-      : op.insert
-      ? new Delta().push(op)
-      : null;
+
+    if (node.children) {
+      return this.convertChildren(parent, node, op);
+    }
+    const result = new Delta();
+
+    if (op.insert) {
+      if (typeof op.insert === 'string' && this.splitAttributes) {
+        const slices = op.insert.split('\n');
+        if (slices.length === 1) {
+          result.push(op);
+        } else {
+          for (let i = 0; i < slices.length; i++) {
+            const slice = slices[i];
+            if (i > 0) {
+              this.splitAttributes['list'] = 'none';
+            }
+            if (slice) {
+              result.insert(slice);
+            }
+            if (i < slices.length - 1 || slice === '') {
+              result.insert('\n', this.splitAttributes);
+            }
+          }
+        }
+      } else {
+        result.push(op);
+      }
+    }
+
+    return result;
   }
 
   private embedFormat(node: any, op: Op, value: any, attributes?: any): Delta {
@@ -287,33 +315,49 @@ export class MarkdownToQuill {
     });
   }
 
+  private getListAttributes(parent: any, node: any, indent: number): { list: string; indent?: number } {
+    let listAttribute = '';
+    if (parent.ordered) {
+      listAttribute = 'ordered';
+    } else if (node.checked) {
+      listAttribute = 'checked';
+    } else if (node.checked === false) {
+      listAttribute = 'unchecked';
+    } else {
+      listAttribute = 'bullet';
+    }
+
+    const attributes: { list: string; indent?: number } = { list: listAttribute };
+    if (indent) {
+      attributes.indent = indent;
+    }
+
+    return attributes;
+  }
+
+  private convertListItemChild(parent: any, node: any, child: any, indent: number): Delta {
+    let delta = new Delta();
+
+    if (child.type === 'code') {
+      delta = delta.concat(this.convertCodeBlock(child, 'plain', true));
+    } else if (child.type !== 'list') {
+      let prevAttributes = this.splitAttributes;
+      const attributes = this.getListAttributes(parent, node, indent);
+      this.splitAttributes = attributes;
+      delta = delta.concat(this.convertChildren(parent, child, {}, indent + 1));
+      delta.insert('\n', attributes);
+      this.splitAttributes = prevAttributes;
+    } else {
+      delta = delta.concat(this.convertChildren(parent, child, {}, indent + 1));
+    }
+
+    return delta;
+  }
+
   private convertListItem(parent: any, node: any, indent = 0): Delta {
     let delta = new Delta();
     for (const child of node.children) {
-      if (child.type === 'code') {
-        delta = delta.concat(this.convertCodeBlock(child, 'plain', true));
-        continue;
-      }
-      delta = delta.concat(this.convertChildren(parent, child, {}, indent + 1));
-      if (child.type === 'list') {
-        continue;
-      }
-      let listAttribute = '';
-      if (parent.ordered) {
-        listAttribute = 'ordered';
-      } else if (node.checked) {
-        listAttribute = 'checked';
-      } else if (node.checked === false) {
-        listAttribute = 'unchecked';
-      } else {
-        listAttribute = 'bullet';
-      }
-      const attributes = { list: listAttribute };
-      if (indent) {
-        attributes['indent'] = indent;
-      }
-
-      delta.push({ insert: '\n', attributes });
+      delta = delta.concat(this.convertListItemChild(parent, node, child, indent));
     }
     if (this.options.debug) {
       console.log('list item', delta.ops);

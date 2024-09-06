@@ -1,0 +1,10 @@
+[
+  {
+    "insert": "reply with the following text exactly\n\nfirst line\n\nbullet on first line"
+  },
+  { "insert": "\n", "attributes": { "list": "bullet" } },
+  { "insert": "second line" },
+  { "insert": "\n", "attributes": { "list": "none" } },
+  { "insert": "third line" },
+  { "insert": "\n", "attributes": { "list": "none" } }
+]

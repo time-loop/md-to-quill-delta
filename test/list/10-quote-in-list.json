@@ -1,0 +1,31 @@
+[
+  {
+    "insert": "milk"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "list": "ordered"
+    }
+  },
+  {
+    "insert": "banana"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "blockquote": {
+        "in-list": "none"
+      }
+    }
+  },
+  {
+    "insert": "cheese"
+  },
+  {
+    "insert": "\n",
+    "attributes": {
+      "list": "ordered"
+    }
+  }
+]

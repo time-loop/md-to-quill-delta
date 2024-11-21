@@ -7,7 +7,9 @@
   { "insert": "function f() { }" },
   {
     "attributes": {
-      "code-block": true
+      "code-block": {
+        "code-block": true
+      }
     },
     "insert": "\n"
   },
@@ -21,7 +23,9 @@
 
   {
     "attributes": {
-      "code-block": true
+      "code-block": {
+        "code-block": true
+      }
     },
     "insert": "\n"
   }

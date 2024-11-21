@@ -79,21 +79,37 @@ export class MarkdownToQuill {
       if (line) {
         delta.push({ insert: line });
       }
-      const attributes = {
-        'code-block': child.lang ?? defaultLang,
-      };
-      if (inList) {
-        attributes['code-block'] = {
-          ...attributes,
-          ['in-list']: 'none',
+      const attributes = inList
+        ? {
+          'code-block': {
+            'code-block': child.lang ?? defaultLang,
+            'in-list': 'none',
+          },
+        }
+        : {
+          'code-block': {
+            'code-block': child.lang ?? defaultLang,
+          },
         };
-      }
       delta.push({
         insert: '\n',
         attributes,
       });
     });
 
+    return delta;
+  }
+
+  private convertBlockquote(
+    parent: Node | Parent,
+    node: Node | Parent,
+    op: Op = {},
+    indent = 0,
+    inList = false,
+  ): Delta {
+    const delta = this.convertChildren(parent, node, op, indent);
+    const attributes = inList ?  { blockquote: { 'in-list': 'none' } } : { blockquote: {} };
+    delta.push({ insert: '\n', attributes });
     return delta;
   }
 
@@ -191,10 +207,7 @@ export class MarkdownToQuill {
             });
             break;
           case 'blockquote':
-            delta = delta.concat(
-              this.convertChildren(node, child, op, indent + 1)
-            );
-            delta.push({ insert: '\n', attributes: { blockquote: true } });
+            delta = delta.concat(this.convertBlockquote(node, child, op, indent + 1));
             break;
           case 'thematicBreak':
             delta.insert({ divider: true });
@@ -340,6 +353,8 @@ export class MarkdownToQuill {
 
     if (child.type === 'code') {
       delta = delta.concat(this.convertCodeBlock(child, 'plain', true));
+    } else if (child.type === 'blockquote') {
+      delta = delta.concat(this.convertBlockquote(node, child, {}, indent, true));
     } else if (child.type !== 'list') {
       let prevAttributes = this.splitAttributes;
       const attributes = this.getListAttributes(parent, node, indent);

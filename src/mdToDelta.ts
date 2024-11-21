@@ -107,7 +107,7 @@ export class MarkdownToQuill {
     indent = 0,
     inList = false,
   ): Delta {
-    const delta = this.convertChildren(parent, node, op, indent)
+    const delta = this.convertChildren(parent, node, op, indent);
     const attributes = inList ?  { blockquote: { 'in-list': 'none' } } : { blockquote: {} };
     delta.push({ insert: '\n', attributes });
     return delta;

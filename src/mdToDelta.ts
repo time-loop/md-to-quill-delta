@@ -100,19 +100,6 @@ export class MarkdownToQuill {
     return delta;
   }
 
-  private convertBlockquote(
-    parent: Node | Parent,
-    node: Node | Parent,
-    op: Op = {},
-    indent = 0,
-    inList = false,
-  ): Delta {
-    const delta = this.convertChildren(parent, node, op, indent);
-    const attributes = inList ?  { blockquote: { 'in-list': 'none' } } : { blockquote: {} };
-    delta.push({ insert: '\n', attributes });
-    return delta;
-  }
-
   private convertChildren(
     parent: Node | Parent,
     node: Node | Parent,
@@ -207,7 +194,10 @@ export class MarkdownToQuill {
             });
             break;
           case 'blockquote':
-            delta = delta.concat(this.convertBlockquote(node, child, op, indent + 1));
+            delta = delta.concat(
+              this.convertChildren(node, child, op, indent + 1)
+            );
+            delta.push({ insert: '\n', attributes: { blockquote: {} } });
             break;
           case 'thematicBreak':
             delta.insert({ divider: true });
@@ -302,7 +292,10 @@ export class MarkdownToQuill {
         } else {
           for (let i = 0; i < slices.length; i++) {
             const slice = slices[i];
-            if (i > 0) {
+            if (
+              i > 0 &&
+              !this.splitAttributes['blockquote']
+            ) {
               this.splitAttributes['list'] = 'none';
             }
             if (slice) {
@@ -354,7 +347,12 @@ export class MarkdownToQuill {
     if (child.type === 'code') {
       delta = delta.concat(this.convertCodeBlock(child, 'plain', true));
     } else if (child.type === 'blockquote') {
-      delta = delta.concat(this.convertBlockquote(node, child, {}, indent, true));
+      let prevAttributes = this.splitAttributes;
+      const attributes = { blockquote: { 'in-list': 'none' } };
+      this.splitAttributes = attributes;
+      delta = delta.concat(this.convertChildren(parent, child, {}, indent + 1));
+      delta.insert('\n', attributes);
+      this.splitAttributes = prevAttributes;
     } else if (child.type !== 'list') {
       let prevAttributes = this.splitAttributes;
       const attributes = this.getListAttributes(parent, node, indent);

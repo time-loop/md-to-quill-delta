@@ -65,10 +65,15 @@ export class MarkdownToQuill {
       mdastExtensions: [gfmTableFromMarkdown(), gfmStrikethroughFromMarkdown(), gfmTaskListItemFromMarkdown()],
     }) as Parent;
 
+    /**
+     * Flatten all nested structures in blockquote, because cu's blockquote only supports paragraphs
+     */
+    const normalizedTree = normalizeTreeNode(tree);
+
     if (this.options.debug) {
-      console.log('tree', tree);
+      console.log('tree', normalizedTree);
     }
-    const delta = this.convertChildren(null, tree, {});
+    const delta = this.convertChildren(null, normalizedTree, {});
     return delta.ops;
   }
 
@@ -119,10 +124,10 @@ export class MarkdownToQuill {
           if (this.options.preciseLineBreak) {
             const diff = child.position.start.line - this.prevEndLine;
             for (let i = 1; i < diff; i++) {
-              delta.insert('\n');
+              delta.insert('\n', this.splitAttributes ?? {});
             }
           } else {
-            delta.insert('\n');
+            delta.insert('\n', this.splitAttributes ?? {});
           }
         }
         switch (child.type) {
@@ -459,4 +464,41 @@ export class MarkdownToQuill {
     }
     return delta;
   }
+}
+
+export function getFlattenParagraphs(node: any): Parent[] {
+  if (node.children) {
+    return node.children.reduce((arr, child) => {
+      if (child.type === 'paragraph') {
+        arr.push(child);
+      } else if (child.children) {
+        arr.push(...getFlattenParagraphs(child));
+      }
+      return arr;
+    }, []);
+  }
+  return [];
+}
+
+/**
+ * #1 Flatten all nested structures in blockquote, because cu's blockquote only supports paragraphs
+ * @param root Parent
+ * @returns Parent
+ */
+export function normalizeTreeNode(root: any): Parent {
+  if (root.children) {
+    return {
+      ...root,
+      children: root.children.map((child) => {
+        if (child.type === 'blockquote') {
+          return {
+            ...child,
+            children: getFlattenParagraphs(child),
+          };
+        }
+        return normalizeTreeNode(child);
+      }),
+    };
+  }
+  return root;
 }

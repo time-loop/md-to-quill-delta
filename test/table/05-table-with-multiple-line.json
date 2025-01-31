@@ -3,7 +3,7 @@
     "insert": "\n\n",
     "attributes": {
       "table-col": {
-        "width": 150
+        "width": "150"
       }
     }
   },

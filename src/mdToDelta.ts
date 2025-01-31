@@ -154,7 +154,7 @@ export class MarkdownToQuill {
             const colNumber = firstRow.children.length;
             const colsInsertStr = new Array(colNumber).fill('\n').join('');
             delta = delta.concat(
-              new Delta().insert(colsInsertStr, { 'table-col': { width: 150 } })
+              new Delta().insert(colsInsertStr, { 'table-col': { width: '150' } })
             );
 
             delta = delta.concat(

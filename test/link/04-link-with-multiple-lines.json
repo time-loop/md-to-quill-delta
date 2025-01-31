@@ -1,0 +1,20 @@
+[
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300"
+    },
+    "insert": "click "
+  },
+  {
+    "insert": "\n"
+  },
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300"
+    },
+    "insert": " here"
+  },
+  {
+    "insert": "\n\n"
+  }
+]

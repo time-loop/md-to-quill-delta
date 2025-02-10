@@ -1,0 +1,37 @@
+[
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300"
+    },
+    "insert": "a "
+  },
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300",
+      "bold": true
+    },
+    "insert": "b"
+  },
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300"
+    },
+    "insert": " "
+  },
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300",
+      "italic": true
+    },
+    "insert": "c"
+  },
+  {
+    "attributes": {
+      "link": "https://placebear.com/g/200/300"
+    },
+    "insert": " d"
+  },
+  {
+    "insert": "\n"
+  }
+]

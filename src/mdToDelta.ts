@@ -211,9 +211,6 @@ export class MarkdownToQuill {
           case 'break':
             delta.insert('\n');
             break;
-          case 'link':
-            delta = delta.concat(this.convertLinkItem(child));
-            break;
           case 'image':
             delta = delta.concat(
               this.embedFormat(
@@ -266,6 +263,8 @@ export class MarkdownToQuill {
         return this.inlineFormat(parent, child, op, { strike: true });
       case 'inlineCode':
         return this.inlineFormat(parent, child, op, { code: true });
+      case 'link':
+        return this.inlineFormat(parent, child, op, { link: child.url });
       case 'text':
       default:
         return this.inlineFormat(parent, child, op, {});
@@ -291,7 +290,21 @@ export class MarkdownToQuill {
     const result = new Delta();
 
     if (op.insert) {
-      if (typeof op.insert === 'string' && this.splitAttributes) {
+      if (typeof op.insert === 'string' && op.attributes?.link) {
+        const slices = op.insert.split(/\\n|\n/);
+        if (slices.length === 1) {
+          result.push(op);
+        } else {
+          for (let i = 0; i < slices.length; i++) {
+            if (slices[i] !== '') {
+              result.insert(slices[i], op.attributes);
+            }
+            if (i < slices.length - 1) {
+              result.insert('\n');
+            }
+          }
+        }
+      } else if (typeof op.insert === 'string' && this.splitAttributes) {
         const slices = op.insert.split('\n');
         if (slices.length === 1) {
           result.push(op);
@@ -325,37 +338,6 @@ export class MarkdownToQuill {
       insert: value,
       attributes: { ...op.attributes, ...attributes }
     });
-  }
-
-
-  private convertLinkItem(node: any): Delta {
-    const result = new Delta();
-
-    const link: string | undefined = node?.url;
-    const linkText: string | undefined = node?.children?.[0]?.value;
-    if (link && linkText) {
-      const linkSections = linkText.split('\\n');
-      const hasMultipleLines = linkSections.length > 1;
-      if (!hasMultipleLines) {
-        result.insert(linkText, {link});
-      } else {
-        for (let i = 0; i < linkSections.length; i++) {
-          const linkSection = linkSections[i];
-          if (linkSection !== '') {
-            result.insert(linkSections[i], {link});
-          }
-          if (i < linkSections.length - 1) {
-            result.insert('\n');
-          }
-        }
-      }
-    } else {
-      if (this.options.debug) {
-        console.log('link or linkText not found on node:', {node, link, linkText});
-      }
-    }
-
-    return result;
   }
 
   private getListAttributes(parent: any, node: any, indent: number): { list: string; indent?: number } {

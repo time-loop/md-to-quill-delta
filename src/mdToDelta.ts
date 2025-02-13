@@ -154,7 +154,7 @@ export class MarkdownToQuill {
             const colNumber = firstRow.children.length;
             const colsInsertStr = new Array(colNumber).fill('\n').join('');
             delta = delta.concat(
-              new Delta().insert(colsInsertStr, { 'table-col': { width: 150 } })
+              new Delta().insert(colsInsertStr, { 'table-col': { width: '150' } })
             );
 
             delta = delta.concat(
@@ -290,7 +290,21 @@ export class MarkdownToQuill {
     const result = new Delta();
 
     if (op.insert) {
-      if (typeof op.insert === 'string' && this.splitAttributes) {
+      if (typeof op.insert === 'string' && op.attributes?.link) {
+        const slices = op.insert.split(/\\n|\n/);
+        if (slices.length === 1) {
+          result.push(op);
+        } else {
+          for (let i = 0; i < slices.length; i++) {
+            if (slices[i] !== '') {
+              result.insert(slices[i], op.attributes);
+            }
+            if (i < slices.length - 1) {
+              result.insert('\n');
+            }
+          }
+        }
+      } else if (typeof op.insert === 'string' && this.splitAttributes) {
         const slices = op.insert.split('\n');
         if (slices.length === 1) {
           result.push(op);

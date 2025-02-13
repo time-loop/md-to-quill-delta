@@ -3,7 +3,7 @@
     "insert": "\n\n\n",
     "attributes": {
       "table-col": {
-        "width": 150
+        "width": "150"
       }
     }
   },
@@ -140,7 +140,7 @@
     "insert": "\n\n\n",
     "attributes": {
       "table-col": {
-        "width": 150
+        "width": "150"
       }
     }
   },
@@ -283,7 +283,7 @@
     "insert": "\n\n\n",
     "attributes": {
       "table-col": {
-        "width": 150
+        "width": "150"
       }
     }
   },

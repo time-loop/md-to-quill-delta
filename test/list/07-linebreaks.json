@@ -48,10 +48,10 @@
     "attributes": {
       "link": "https://staging.clickup.com/t/8x8uva93c"
     },
-    "insert": "Move blocks (single and multi select) up and down via CMD/CTRL + Shift + Up/Down\n"
+    "insert": "Move blocks (single and multi select) up and down via CMD/CTRL + Shift + Up/Down"
   },
   {
-    "insert": "\nLine4"
+    "insert": "\n\nLine4"
   },
   {
     "insert": "\n",

@@ -121,7 +121,7 @@ export class MarkdownToQuill {
       let prevType;
       children.forEach((child, idx) => {
         if (this.isBlock(child.type) && this.isBlock(prevType)) {
-          if (this.options.preciseLineBreak && (child.type !== 'heading')) {
+          if (this.options.preciseLineBreak) {
             const diff = child.position.start.line - this.prevEndLine;
             for (let i = 1; i < diff; i++) {
               delta.insert('\n', this.splitAttributes ?? {});

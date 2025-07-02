@@ -60,7 +60,8 @@ export class MarkdownToQuill {
   }
 
   convert(text: string): Op[] {
-    const tree: Parent = fromMarkdown(text, {
+    const normalizedText = normalizeInputText(text);
+    const tree: Parent = fromMarkdown(normalizedText, {
       extensions: [gfmStrikethrough(), gfmTable(), gfmTaskListItem()],
       mdastExtensions: [gfmTableFromMarkdown(), gfmStrikethroughFromMarkdown(), gfmTaskListItemFromMarkdown()],
     }) as Parent;
@@ -515,4 +516,17 @@ export function normalizeTreeNode(root: any): Parent {
     };
   }
   return root;
+}
+
+export function normalizeInputText(text: string): string {
+  if (!text) {
+    return '';
+  }
+
+  const lines = text.split('\n');
+  return lines
+    .map((line) => {
+      return line.trimEnd();
+    })
+    .join('\n');
 }
